@@ -1,60 +1,33 @@
-from flask import Blueprint, request, jsonify
-from user.model import User
-from db import db
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask import Blueprint, jsonify
+from auth.model import User
 
 user_blueprint = Blueprint('user', __name__)
 
-@user_blueprint.route('/registration', methods=['POST'])
-def register():
-    data = request.get_json()
-    username = data.get("username")
-    password = data.get("password")
-    bio = data.get("bio")
-    role = data.get("role", "USER")
+@user_blueprint.route('', methods=['GET'])
+@jwt_required()  # This decorator ensures a valid JWT is present in the request
+def get_profile():
+    try:
+        # Get the identity of the current user from the JWT
+        current_user_id = get_jwt_identity()
 
-    if not username or not password or not bio:
-        return {
-            'error_message': 'username atau password tidak boleh kosong'
-        }, 400
+        # Retrieve the user from the database based on the user_id
+        user = User.query.get(current_user_id)
 
-    # Check if the username is already taken
-    existing_user = User.query.filter_by(username=username).first()
-    if existing_user:
-        return {
-            'error_message': 'username sudah digunakan'
-        }, 400
+        if not user:
+            return jsonify({"error_message": "User not found"}), 404
 
-    # Create a new user
-    new_user = User(username=username, password = password, bio=bio, role=role)
+        # For now, ignore following, followers, and tweets
+        response_data = {
+            'user_id': user.id,
+            'username': user.username,
+            'bio': user.bio,
+            'following': 0,  # Placeholder for following count
+            'followers': 0,  # Placeholder for followers count
+            'tweets': []     # Placeholder for tweets list
+        }
 
-    db.session.add(new_user)
-    db.session.commit()
-
-    return {
-        'user_id': new_user.id,
-        'username': new_user.username,
-        'bio': new_user.bio
-    }
-    
-
-@user_blueprint.route('/login', methods=['POST'])
-def login():
-    data = request.get_json()
-    username = data.get("username")
-    password = data.get("password")
-
-    if not username or not password:
-        return {
-            'error_message': 'username atau password tidak boleh kosong'
-        }, 400
-
-    user = User.query.filter_by(username=username).first()
-
-    if user and user.password == password:
-        return {
-            'token': 'abcdef'
-        }, 200
-    else:
-        return {
-            'error_message': 'username atau password tidak tepat'
-        }, 401
+        return jsonify(response_data), 200
+    except Exception as e:
+        print(str(e))
+        return jsonify({"error_message": "Internal Server Error"}), 500
