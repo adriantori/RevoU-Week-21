@@ -2,6 +2,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask import Blueprint, jsonify
 from auth.model import User
 from tweet.model import Tweet
+from follow.model import Follow
 
 user_blueprint = Blueprint('user', __name__)
 
@@ -21,13 +22,16 @@ def get_profile():
         # Retrieve the 10 most recent tweets for the user
         recent_tweets = Tweet.query.filter_by(user_id=current_user_id).order_by(Tweet.published_at.desc()).limit(10).all()
 
-        # For now, ignore following, followers
+        # Count the number of followers and following
+        followers_count = Follow.query.filter_by(following_id=current_user_id).count()
+        following_count = Follow.query.filter_by(follower_id=current_user_id).count()
+
         response_data = {
             'user_id': user.id,
             'username': user.username,
             'bio': user.bio,
-            'following': 0,  # Placeholder for following count
-            'followers': 0,  # Placeholder for followers count
+            'following': following_count,
+            'followers': followers_count,
             'tweets': [
                 {
                     'id': tweet.id,
