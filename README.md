@@ -10,11 +10,29 @@
 
 - Follow / unfollow someone based on their user id
 
+##### Advanced:
+
+- Adds moderation page, which can only be accessed by, you guess it, MODERATOR.
+
+- They can flag tweet as spam and suspend user.
+
+- Changed how profile and tweet fetched.
+
+- Also note that I only wrote the important code on Advanced section instead of changing the intermediate code. Just imagine the Advanced section codes somehow override it.
+
 ## How to use:
 
 1. Pull the project (in case I cant deploy it)
 
-2. Uncomment this line of code on app.py to initialize database (shouldn't need to since its connected to my database, which contains necesssary column)
+2. run these codes (and I hope its correct):
+   
+   ```python
+   pip install pipenv
+   pipenv shell
+   pipenv install
+   ```
+
+3. Uncomment this line of code on app.py to initialize database (shouldn't need to since its connected to my database, which contains necesssary column)
 
 ```python
 # with app.app_context():
@@ -55,7 +73,6 @@ class User(db.Model):
 
     def check_password(self, password):
         return bcrypt.check_password_hash(self.password, password)
-
 ```
 
 ### Tweet:
@@ -69,7 +86,6 @@ class Tweet(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     published_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     tweet = db.Column(db.String(150), nullable=False)
-
 ```
 
 ### Follow:
@@ -81,7 +97,6 @@ class Follow(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     follower_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     following_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
 ```
 
 ## List of important codes:
@@ -201,4 +216,81 @@ user = User.query.filter_by(username=username).first()
 
 ## Advanced:
 
-Soon:tm:
+do keep in mind that this part of codes and model overrides previous codes. I didnt change the previous codes for documentation and differentiate between intermediate and advanced tasks.
+
+### Fetch Followed Tweets Exluding Current User:
+
+```python
+# Retrieve the IDs of all users that the current user is following, excluding the current user's ID
+        following_ids = [follow.following_id for follow in Follow.query.filter_by(follower_id=current_user_id)] + [current_user_id]
+
+        # Exclude the current user's ID from the list of following_ids
+        following_ids = [user_id for user_id in following_ids if user_id != current_user_id]
+
+        # Retrieve the 10 most recent tweets from the followed users, excluding flagged tweets
+        feed_tweets = (
+            Tweet.query
+            .filter(Tweet.user_id.in_(following_ids), ~Tweet.is_spam)  # Exclude flagged tweets
+            .order_by(Tweet.published_at.desc())
+            .limit(10)
+            .all()
+        )
+
+        # Prepare the response data
+        response_data = {
+            'tweets': [
+                {
+                    'id': tweet.id,
+                    'user_id': tweet.user_id,
+                    'username': tweet.user.username,
+                    'published_at': tweet.published_at,
+                    'tweet': tweet.tweet
+                } for tweet in feed_tweets
+            ]
+        }
+```
+
+### User Suspend:
+
+```python
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(60), nullable=False)  # Updated to store hashed passwords
+    bio = db.Column(db.String(200), nullable=False)
+    role = db.Column(EnumType(UserRole), default=UserRole.USER, nullable=False)
+    is_suspended = db.Column(db.Boolean, default=False)  # New column for suspending users
+```
+
+```python
+# Login():
+user = User.query.filter_by(username=username).first()
+
+    if user and user.check_password(password):
+        if user.is_suspended:
+            return {
+                'error_message': 'akun telah di suspend'
+            }, 401
+```
+
+### Tweet Flag:
+
+```python
+from db import db
+from datetime import datetime
+
+class Tweet(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    published_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    tweet = db.Column(db.String(150), nullable=False)
+    is_spam = db.Column(db.Boolean, default=False)  # New column for flagging tweets
+
+```
+
+### User Fetch Profile Exlude Flagged:
+
+```python
+# Retrieve the 10 most recent tweets for the user, excluding flagged tweets
+recent_tweets = Tweet.query.filter_by(user_id=current_user_id, is_spam=False).order_by(Tweet.published_at.desc()).limit(10).all()      )
+```
