@@ -1,0 +1,40 @@
+{
+    "version": 2,
+    "builds": [
+      {
+        "src": "app.py",
+        "use": "@now/python"
+      }
+    ],
+    "routes": [
+      {
+        "src": "/auth/(.*)",
+        "dest": "/auth/apis.py"
+      },
+      {
+        "src": "/user/(.*)",
+        "dest": "/user/apis.py"
+      },
+      {
+        "src": "/tweet/(.*)",
+        "dest": "/tweet/apis.py"
+      },
+      {
+        "src": "/following/(.*)",
+        "dest": "/follow/apis.py"
+      },
+      {
+        "src": "/moderation/(.*)",
+        "dest": "/moderator/apis.py"
+      },
+      {
+        "src": "/(.*)",
+        "dest": "/app.py"
+      }
+    ],
+    "env": {
+        "DB_URI": "@db-uri",
+        "JWT_KEY": "@jwt-key"
+      }
+  }
+  
