@@ -58,6 +58,11 @@ def login():
     user = User.query.filter_by(username=username).first()
 
     if user and user.check_password(password):
+        if user.is_suspended:
+            return {
+                'error_message': 'akun telah di suspend'
+            }, 401
+
         # Use Flask-JWT-Extended to generate a token
         access_token = create_access_token(identity=user.id)
         return {

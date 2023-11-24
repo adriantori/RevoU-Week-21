@@ -6,6 +6,7 @@ from auth.apis import auth_blueprint
 from user.apis import user_blueprint
 from tweet.apis import tweet_blueprint
 from follow.apis import follow_blueprint
+from moderator.apis import moderator_blueprint
 from db import db, db_init
 
 app = Flask(__name__)
@@ -20,6 +21,7 @@ app.register_blueprint(auth_blueprint, url_prefix="/auth")
 app.register_blueprint(user_blueprint, url_prefix="/user")
 app.register_blueprint(tweet_blueprint, url_prefix="/tweet")
 app.register_blueprint(follow_blueprint, url_prefix="/following")
+app.register_blueprint(moderator_blueprint, url_prefix="/moderation")
 
 # with app.app_context():
 #     db_init()

@@ -43,7 +43,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\":\"test\",\r\n    \"password\":\"test123\"\r\n}",
+							"raw": "{\r\n    \"username\":\"test1\",\r\n    \"password\":\"test123\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -66,31 +66,142 @@
 			]
 		},
 		{
-			"name": "user",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{bearerApi}}",
-							"type": "string"
+			"name": "fetchInfos",
+			"item": [
+				{
+					"name": "user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearerApi}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/user",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user"
+							]
 						}
-					]
+					},
+					"response": []
 				},
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{base_url}}/user",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"user"
-					]
+				{
+					"name": "feeds",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearerApi}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/user",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
+		},
+		{
+			"name": "moderators",
+			"item": [
+				{
+					"name": "flagTweet",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearerApi}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"tweet_id\": 1,\r\n  \"is_spam\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/moderation/tweet",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"moderation",
+								"tweet"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "flagUser",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bearerApi}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"user_id\": 1,\r\n  \"is_suspended\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/moderation/user",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"moderation",
+								"user"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		},
 		{
 			"name": "tweet",

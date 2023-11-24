@@ -15,6 +15,7 @@ class User(db.Model):
     password = db.Column(db.String(60), nullable=False)  # Updated to store hashed passwords
     bio = db.Column(db.String(200), nullable=False)
     role = db.Column(EnumType(UserRole), default=UserRole.USER, nullable=False)
+    is_suspended = db.Column(db.Boolean, default=False)  # New column for suspending users
 
     def set_password(self, password):
         self.password = bcrypt.generate_password_hash(password).decode('utf-8')
